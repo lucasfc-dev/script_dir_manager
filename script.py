@@ -18,7 +18,7 @@ class DirManager:
 
     def goToPreviousDir(self):
         previous_dir = self.getPreviousDir()
-        if previous_dir == self.base_dir:
+        if self.current_dir == self.base_dir:
             return 'Already in the base directory'
         self.setCurrentDir(previous_dir)
 
@@ -36,7 +36,16 @@ class DirManager:
         return 'Directory already exists'
 
     def viewDirectoryContents(self):
-        return os.listdir(self.current_dir)
+        contents = os.listdir(self.current_dir)
+        formated_contents = []
+        for item in contents:
+            path = os.path.join(dir_manager.getCurrentDir(), item)
+            if os.path.isdir(path):
+                formated_contents.insert(0, f'[DIR] {item}')
+            else:
+                formated_contents.append(item)
+
+        return formated_contents
 
     def createFile(self, file_name, content):
         file_path = os.path.join(self.current_dir, file_name)
@@ -55,8 +64,11 @@ class DirManager:
     def deleteDirectory(self, dir_name):
         path_dir = os.path.join(self.current_dir, dir_name)
         if os.path.exists(path_dir):
-            shutil.rmtree(path_dir)
-            return 'Directory deleted successfully'
+            if os.path.isdir(path_dir):
+                shutil.rmtree(path_dir)
+                return 'Directory deleted successfully'
+            os.remove(path_dir)
+            return 'File deleted successfully'
         return 'Directory does not exist'
 
 
@@ -125,18 +137,14 @@ class App(tk.Tk):
         self.lst_contents.insert(tk.END, '[DIR] ...')
         contents = dir_manager.viewDirectoryContents()
         for item in contents:
-            path = os.path.join(dir_manager.getCurrentDir(), item)
-            if os.path.isdir(path):
-                self.lst_contents.insert(tk.END, f'[DIR] {item}')
-            else:
-                self.lst_contents.insert(tk.END, item)
+            self.lst_contents.insert(tk.END, item)
     def on_item_double_click(self, event):
         selection = self.lst_contents.curselection()
         if not selection:
             return
         item_text = self.lst_contents.get(selection[0])
         if item_text == '[DIR] ...':
-            dir_manager.setCurrentDir(dir_manager.getPreviousDir())
+            dir_manager.goToPreviousDir()
             self.update_dir_label()
             self.view_contents()
         elif item_text.startswith('[DIR] '):
