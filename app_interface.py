@@ -1,85 +1,16 @@
-import os
-from io import BytesIO
-import shutil
+
 import tkinter as tk
-
-class DirManager:
-    def __init__(self, base_dir):
-        self.base_dir = base_dir
-        self.current_dir = base_dir
-
-    def setCurrentDir(self, path_dir):
-        if not os.path.exists(path_dir):
-            return 'Directory does not exist'
-        if not path_dir.startswith(self.base_dir):
-            return 'Cannot navigate outside the base directory'
-        os.chdir(path_dir)
-        self.current_dir = os.getcwd()
-
-    def goToPreviousDir(self):
-        previous_dir = self.getPreviousDir()
-        if self.current_dir == self.base_dir:
-            return 'Already in the base directory'
-        self.setCurrentDir(previous_dir)
-
-    def getCurrentDir(self):
-        return self.current_dir
-
-    def getPreviousDir(self):
-        return os.path.dirname(self.current_dir)
-
-    def createDirectory(self, dir_name):
-        path_dir = os.path.join(self.current_dir, dir_name)
-        if not os.path.exists(path_dir):
-            os.mkdir(path_dir)
-            return 'Directory created successfully'
-        return 'Directory already exists'
-
-    def viewDirectoryContents(self):
-        contents = os.listdir(self.current_dir)
-        formated_contents = []
-        for item in contents:
-            path = os.path.join(self.getCurrentDir(), item)
-            if os.path.isdir(path):
-                formated_contents.insert(0, f'[DIR] {item}')
-            else:
-                formated_contents.append(item)
-
-        return formated_contents
-
-    def createFile(self, file_name, content):
-        file_path = os.path.join(self.current_dir, file_name)
-        with open(file_path, 'w') as f:
-            f.write(content)
-        return 'File created successfully'
-
-    def uploadFile(self, file_path):
-        with open(file_path,'r') as file:
-            content = file.read()
-            filename = file.name.split('/')[-1]
-        with open(os.path.join(self.current_dir, filename), 'w') as f:
-            f.write(content)
-        return 'File uploaded successfully'
-
-    def deleteDirectory(self, dir_name):
-        path_dir = os.path.join(self.current_dir, dir_name)
-        if os.path.exists(path_dir):
-            if os.path.isdir(path_dir):
-                shutil.rmtree(path_dir)
-                return 'Directory deleted successfully'
-            os.remove(path_dir)
-            return 'File deleted successfully'
-        return 'Directory does not exist'
+from dir_manage import DirManager
 
 
 # Interface Tkinter
 
 class App(tk.Tk):
-    def __init__(self, dir_manager):
+    def __init__(self, dir_manager:DirManager):
         super().__init__()
         self.title('Gerenciador de Diretórios e Arquivos')
         self.geometry('700x600')
-        self.dir_manager = DirManager(os.path.abspath('./virtual_dir'))
+        self.dir_manager = dir_manager
 
         # Diretório atual
         self.lbl_dir = tk.Label(self, text=f'Diretório atual: {self.dir_manager.getCurrentDir()}', font=('Arial', 12, 'bold'))
@@ -125,10 +56,9 @@ class App(tk.Tk):
         self.btn_confirm_createfile = tk.Button(self.frame_createfile, text='Confirmar', command=self.create_file)
         self.btn_confirm_createfile.pack(side=tk.LEFT, padx=5)
 
+        from tkinter import filedialog
         self.frame_upload = tk.Frame(self)
-        self.entry_upload = tk.Entry(self.frame_upload, width=30)
-        self.entry_upload.pack(side=tk.LEFT, padx=5)
-        self.btn_confirm_upload = tk.Button(self.frame_upload, text='Confirmar', command=self.upload_file)
+        self.btn_confirm_upload = tk.Button(self.frame_upload, text='Selecionar Arquivo e Upload', command=self.upload_file)
         self.btn_confirm_upload.pack(side=tk.LEFT, padx=5)
 
         self.frame_setdir = tk.Frame(self)
@@ -192,7 +122,7 @@ class App(tk.Tk):
             self.view_contents()
         elif item_text.startswith('[DIR] '):
             dir_name = item_text[6:]
-            self.dir_manager.setCurrentDir(os.path.join(self.dir_manager.getCurrentDir(), dir_name))
+            self.dir_manager.setCurrentDir(self.dir_manager.join_paths(dir_name))
             self.update_dir_label()
             self.view_contents()
 
@@ -220,7 +150,11 @@ class App(tk.Tk):
         self.view_contents()
 
     def upload_file(self):
-        file_path = self.entry_upload.get()
+        from tkinter import filedialog
+        file_path = filedialog.askopenfilename()
+        if not file_path:
+            self.lbl_status.config(text='Nenhum arquivo selecionado')
+            return
         try:
             msg = self.dir_manager.uploadFile(file_path)
         except Exception as e:
@@ -236,11 +170,3 @@ class App(tk.Tk):
         self.update_dir_label()
         self.view_contents()
 
-def main():
-    BASE_DIR = os.path.abspath('./virtual_dir')
-    dir_manager = DirManager(BASE_DIR)
-    app = App(dir_manager)
-    app.mainloop()
-
-if __name__ == '__main__':
-    main()
