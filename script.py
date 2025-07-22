@@ -11,6 +11,8 @@ class DirManager:
     def setCurrentDir(self, path_dir):
         if not os.path.exists(path_dir):
             return 'Directory does not exist'
+        if not path_dir.startswith(self.base_dir):
+            return 'Cannot navigate outside the base directory'
         os.chdir(path_dir)
         self.current_dir = os.getcwd()
 
@@ -209,8 +211,9 @@ class App(tk.Tk):
         self.view_contents()
 
     def create_file(self):
-        file_name = self.entry_filename.get()+'.txt'
-        print(file_name)
+        file_name = self.entry_filename.get()
+        if len(file_name.split('.')) < 2:
+            file_name += '.txt'
         content = self.txt_filecontent.get('1.0', tk.END)
         msg = self.dir_manager.createFile(file_name, content)
         self.lbl_status.config(text=msg)
