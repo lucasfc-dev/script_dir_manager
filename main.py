@@ -1,4 +1,4 @@
-from dir_manage import DirManager
+from dir_manager import DirManager
 from app_interface import App
 import os 
 

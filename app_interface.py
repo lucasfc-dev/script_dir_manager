@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from dir_manage import DirManager
+from dir_manager import DirManager
 
 
 # Interface Tkinter

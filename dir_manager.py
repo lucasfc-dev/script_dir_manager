@@ -21,7 +21,9 @@ class DirManager:
         self.setCurrentDir(previous_dir)
 
     def getCurrentDir(self):
-        return self.current_dir
+        full_path = os.path.abspath(self.current_dir)
+        rel_path = os.path.relpath(full_path, self.base_dir)
+        return rel_path
 
     def getPreviousDir(self):
         return os.path.dirname(self.current_dir)
@@ -37,13 +39,16 @@ class DirManager:
         contents = os.listdir(self.current_dir)
         formated_contents = []
         for item in contents:
-            path = os.path.join(self.getCurrentDir(), item)
-            if os.path.isdir(path):
-                formated_contents.insert(0, f'[DIR] {item}')
+            full_path = os.path.join(self.current_dir, item)
+            # path relativo à base_dir, para não expor caminhos absolutos
+            rel_path = os.path.relpath(full_path, self.base_dir)
+            if os.path.isdir(full_path):
+                formated_contents.insert(0, {'label': f'[DIR] {item}', 'path': rel_path})
             else:
-                formated_contents.append(item)
+                formated_contents.append({'label': item, 'path': rel_path})
 
         return formated_contents
+    
 
     def createFile(self, file_name, content):
         file_path = os.path.join(self.current_dir, file_name)
@@ -69,5 +74,5 @@ class DirManager:
             return 'File deleted successfully'
         return 'Directory does not exist'
     
-    def join_paths(self, *args):
+    def join_full_path(self, *args):
         return os.path.join(self.current_dir, *args)
