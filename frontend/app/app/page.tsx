@@ -1,12 +1,9 @@
 'use client';
-import { GoFileDirectoryFill } from "react-icons/go";
 import ItemPasta, { IItemPasta } from "./components/itemPasta";
 import { useEffect, useState } from "react";
-import { getFiles, getPath, prevDirectory, setDirectory } from "./api/api";
-import { get } from "http";
-import { CiCirclePlus } from "react-icons/ci";
-import { span } from "framer-motion/m";
+import { createDirectory, getFiles, getPath, prevDirectory, setDirectory } from "./api/api";
 import ItemNovoDir from "./components/itemNovoDir";
+import Header from "./components/header";
 
 export default function Root() {
   const [pathAtual, setPathAtual] = useState<string>("");
@@ -98,15 +95,7 @@ export default function Root() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8000/create-directory?name=${encodeURIComponent(name)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create directory");
-      }
+      await createDirectory(name);
       setCriandoDiretorio(false);
       setNomeDiretorio("");
       await getFilesFromAPI();
@@ -117,45 +106,37 @@ export default function Root() {
 
   return (
     <main className="flex h-screen w-screen flex-col">
-
       <section className="flex h-full flex-col p-28">
-        <header className="flex w-full bg-white text-black h-16 items-center justify-center">
-          <nav className="flex items-center justify-between w-full px-4">
-            <div>
-              <input type="file" onChange={handleUpload} className="flex items-center gap-2 p-2 bg-[#F0E4D7] rounded-lg shadow-md hover:bg-[#EB9731] transition-colors duration-200" onClick={handleGoBack}>
-              </input>
+        <div className="bg-[#EEDDC0] w-full h-full custom-scrollbar overflow-y-auto">
+          <Header
+            pathAtual={pathAtual}
+            handleGoBack={handleGoBack}
+            handleUpload={handleUpload}
+            handleCreateDirectory={handleCreateDirectory}
+          />
+          <div className="flex gap-2 flex-wrap p-4 p-4">
+            <div className="flex flex-wrap gap-2">
+              {files.map((file: IItemPasta, index) => (
+                <ItemPasta
+                  type={file.type}
+                  key={index}
+                  label={file.label}
+                  path={file.path}
+                  onClick={() => handleClick(file)}
+                  onDoubleClick={() => handleDoubleClick(file.path)}
+                />
+              ))}
+              {criandoDiretorio && (
+                <ItemNovoDir
+                  onCreate={uploadNewDirectory}
+                  onChange={setNomeDiretorio}
+                  nomeDiretorio={nomeDiretorio}
+                />
+              )}
             </div>
-            <div>
-              <div onClick={handleCreateDirectory} className="flex items-center gap-2 p-2 bg-[#F0E4D7] rounded-lg shadow-md hover:bg-[#EB9731] transition-colors duration-200">
-                <h2 className="text-black text-2xl font-bold mb-4">Criar diretório</h2>
-              </div>
-            </div>
-          </nav>
-        </header>
-        <div className="flex w-full h-full gap-2 bg-[#EEDDC0] flex-wrap p-4 custom-scrollbar overflow-y-auto p-4">
-          <div className="flex flex-wrap gap-2">
-            <div onClick={handleGoBack} className="flex flex-col break-words items-center gap-2 p-4 justify-center w-32 h-32 bg-[#F0E4D7] rounded-lg shadow-md cursor-pointer hover:bg-[#EB9731] transition-colors duration-200">
-              <h2 className="text-black text-2xl font-bold mb-4">[...]</h2>
-            </div>
-            {files.map((file: IItemPasta, index) => (
-              <ItemPasta
-                type={file.type}
-                key={index}
-                label={file.label}
-                path={file.path}
-                onClick={() => handleClick(file)}
-                onDoubleClick={() => handleDoubleClick(file.path)}
-              />
-            ))}
-            {criandoDiretorio && (
-              <ItemNovoDir
-                onCreate={handleCreateDirectory}
-                onChange={setNomeDiretorio}
-                nomeDiretorio={nomeDiretorio}
-              />
-            )}
           </div>
         </div>
+
 
       </section>
     </main>

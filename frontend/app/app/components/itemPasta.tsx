@@ -14,7 +14,10 @@ export interface IItemPasta {
 export default function ItemPasta({ label, path, type, onClick, onDoubleClick }: IItemPasta) {
 
     return (
-        <div onClick={onClick} onDoubleClick={() => onDoubleClick?.(path)} className="flex flex-col break-words items-center gap-2 p-4 justify-center w-32 h-32 bg-[#F0E4D7] rounded-lg shadow-md cursor-pointer hover:bg-[#EB9731] transition-colors duration-200">
+        <div 
+        onClick={onClick} 
+        onDoubleClick={() => onDoubleClick?.(path)} 
+        className="flex flex-col break-words items-center gap-2 p-4 select-none justify-center w-32 h-32 bg-[#F0E4D7] rounded-lg shadow-md cursor-pointer hover:bg-[#EB9731] transition-colors duration-200">
             {type === 'directory' ? (
                 <GoFileDirectoryFill className="text-4xl text-[#EB9731]" size={48} />
             ) : (

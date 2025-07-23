@@ -11,7 +11,7 @@ export const getPath = async () => {
 
 
 export const setDirectory = async (path: string) => {
-    const response = await fetch(`http://localhost:8000/set-directory/?path=${encodeURIComponent(path)}`, {
+    const response = await fetch(`http://localhost:8000/set-directory/?path=${path}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export const prevDirectory = async () => {
     return await response.json()
 }
 
-export const getFiles = async () : Promise<IItemPasta[]> => {
+export const getFiles = async (): Promise<IItemPasta[]> => {
     const response = await fetch(`http://localhost:8000/directory-contents`);
     if (!response.ok) {
         throw new Error("Failed to fetch files");
@@ -39,4 +39,16 @@ export const getFiles = async () : Promise<IItemPasta[]> => {
     const itens = await response.json() as IItemPasta[]
     console.log(itens)
     return itens
+}
+
+export const createDirectory = async (name: string) => {
+    const response = await fetch(`http://localhost:8000/create-directory/?dir_name=${encodeURIComponent(name)}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Failed to create directory");
+    }
 }
