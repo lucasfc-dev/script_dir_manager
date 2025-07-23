@@ -1,8 +1,17 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI,Request
 from dir_manager import DirManager
 
 app = FastAPI()
 dir_manager = DirManager("./virtual_dir")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/directory-contents")
 def get_directory_contents():
