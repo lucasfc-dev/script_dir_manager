@@ -38,3 +38,8 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     file_content = await file.read()
     dir_manager.uploadFile(file.filename, file_content)
     return {"message": "File uploaded successfully"}
+
+@app.post("/create-directory/")
+async def create_directory(request: Request, dir_name: str):
+    response = dir_manager.createDirectory(dir_name)
+    return {"message": response}
