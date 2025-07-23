@@ -39,8 +39,12 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     msg = dir_manager.uploadFile(file.filename, file_content)
     return {"message": msg}
 
-
 @app.post("/create-directory/")
 async def create_directory(request: Request, dir_name: str):
     response = dir_manager.createDirectory(dir_name)
+    return {"message": response}
+
+@app.delete("/delete-directory/")
+async def delete_directory(request: Request, rel_path: str):
+    response = dir_manager.deleteDirectory(rel_path)
     return {"message": response}

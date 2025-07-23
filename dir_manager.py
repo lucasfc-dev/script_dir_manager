@@ -73,8 +73,8 @@ class DirManager:
                 f.write(file.getvalue())
                 return 'File uploaded successfully'
 
-    def deleteDirectory(self, dir_name):
-        path_dir = self.join_full_path(dir_name)
+    def deleteDirectory(self, rel_path):
+        path_dir = os.path.join(self.base_dir, rel_path)
         if os.path.exists(path_dir):
             if os.path.isdir(path_dir):
                 shutil.rmtree(path_dir)
