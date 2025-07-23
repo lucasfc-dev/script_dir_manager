@@ -7,12 +7,13 @@ class DirManager:
         self.base_dir = os.path.abspath(base_dir)
         self.current_dir = self.base_dir
 
-    def setCurrentDir(self, path_dir):
-        if not os.path.exists(path_dir):
+    def setCurrentDir(self, rel_path_dir):
+        abs_path_dir = os.path.join(self.base_dir, rel_path_dir)
+        if not os.path.exists(abs_path_dir):
             return 'Directory does not exist'
-        if not path_dir.startswith(self.base_dir):
+        if not abs_path_dir.startswith(self.base_dir):
             return 'Cannot navigate outside the base directory'
-        os.chdir(path_dir)
+        os.chdir(abs_path_dir)
         self.current_dir = os.getcwd()
 
     def goToPreviousDir(self):
