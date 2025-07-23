@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { IItemPasta } from "../components/itemPasta";
 
 export const getPath = async () => {
@@ -50,5 +49,17 @@ export const createDirectory = async (name: string) => {
     });
     if (!response.ok) {
         throw new Error("Failed to create directory");
+    }
+}
+
+export const deleteItem = async (path: string) => {
+    const response = await fetch(`http://localhost:8000/delete-directory/?rel_path=${encodeURIComponent(path)}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Failed to delete item");
     }
 }

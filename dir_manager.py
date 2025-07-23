@@ -74,11 +74,19 @@ class DirManager:
                 return 'File uploaded successfully'
 
     def deleteDirectory(self, rel_path):
+        import stat
+        def remove_readonly(func, path, _):
+            try:
+                os.chmod(path, stat.S_IWRITE)
+            except Exception:
+                pass
+            func(path)
         path_dir = os.path.join(self.base_dir, rel_path)
         if os.path.exists(path_dir):
             if os.path.isdir(path_dir):
-                shutil.rmtree(path_dir)
+                shutil.rmtree(path_dir, onerror=remove_readonly)
                 return 'Directory deleted successfully'
+            os.chmod(path_dir, stat.S_IWRITE)
             os.remove(path_dir)
             return 'File deleted successfully'
         return 'Directory does not exist'

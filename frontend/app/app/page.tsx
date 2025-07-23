@@ -1,7 +1,7 @@
 'use client';
 import ItemPasta, { IItemPasta } from "./components/itemPasta";
 import { useEffect, useState } from "react";
-import { createDirectory, getFiles, getPath, prevDirectory, setDirectory } from "./api/api";
+import { createDirectory, deleteItem, getFiles, getPath, prevDirectory, setDirectory } from "./api/api";
 import ItemNovoDir from "./components/itemNovoDir";
 import Header from "./components/header";
 
@@ -10,6 +10,7 @@ export default function Root() {
   const [criandoDiretorio, setCriandoDiretorio] = useState<boolean>(false);
   const [nomeDiretorio, setNomeDiretorio] = useState<string>("");
   const [files, setFiles] = useState<IItemPasta[]>([]);
+  const [itemSelecionado, setItemSelecionado] = useState<IItemPasta | null>(null);
 
   const fetchPathFromAPI = async () => {
     try {
@@ -37,10 +38,11 @@ export default function Root() {
   useEffect(() => {
     console.log(pathAtual)
     getFilesFromAPI()
+    setCriandoDiretorio(false);
   }, [pathAtual])
 
   const handleClick = (file: IItemPasta) => {
-    return
+    setItemSelecionado(file);
   }
 
   const handleDoubleClick = async (path: string) => {
@@ -89,6 +91,17 @@ export default function Root() {
     setNomeDiretorio("")
   }
 
+  const handleDelete = async (item: IItemPasta | null) => {
+    if (!item) return;
+    try {
+      await deleteItem(item.path);
+      setItemSelecionado(null);
+      await getFilesFromAPI();
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  }
+
   const uploadNewDirectory = async (name: string) => {
     if (!name.trim()) {
       console.error("Directory name cannot be empty");
@@ -107,17 +120,24 @@ export default function Root() {
   return (
     <main className="flex h-screen w-screen flex-col">
       <section className="flex h-full flex-col p-28">
-        <div className="bg-[#EEDDC0] w-full h-full custom-scrollbar overflow-y-auto">
+        <div className="bg-[#EEDDC0] shadow-xl rounded w-full h-full custom-scrollbar overflow-y-auto">
           <Header
             pathAtual={pathAtual}
+            handleDelete={() => handleDelete(itemSelecionado)}
             handleGoBack={handleGoBack}
             handleUpload={handleUpload}
             handleCreateDirectory={handleCreateDirectory}
           />
           <div className="flex gap-2 flex-wrap p-4 p-4">
             <div className="flex flex-wrap gap-2">
+              {files.length === 0 ? (
+                <div className="text-gray-500">
+                  <span>Nenhum arquivo ou diretório encontrado.</span>
+                </div>
+              ) : null}
               {files.map((file: IItemPasta, index) => (
                 <ItemPasta
+                  selecionado={itemSelecionado === file}
                   type={file.type}
                   key={index}
                   label={file.label}
@@ -130,6 +150,7 @@ export default function Root() {
                 <ItemNovoDir
                   onCreate={uploadNewDirectory}
                   onChange={setNomeDiretorio}
+                  onCancel={() => setCriandoDiretorio(false)}
                   nomeDiretorio={nomeDiretorio}
                 />
               )}
