@@ -12,7 +12,7 @@ export const getPath = async () => {
 
 export const setDirectory = async (path: string) => {
     const response = await fetch(`http://localhost:8000/set-directory`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },

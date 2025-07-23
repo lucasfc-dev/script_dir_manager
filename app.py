@@ -1,5 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI,Request
+from fastapi import FastAPI,Request, UploadFile, File
 from dir_manager import DirManager
 
 app = FastAPI()
