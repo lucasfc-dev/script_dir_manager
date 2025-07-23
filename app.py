@@ -13,6 +13,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 @app.get("/directory-contents")
@@ -32,7 +33,9 @@ def get_previous_directory():
 
 @app.get('/set-directory/')
 async def set_directory(path: str):
-    dir_manager.setCurrentDir(path)
+    msg = dir_manager.setCurrentDir(path)
+    if msg:
+        return msg
     return {"path": dir_manager.getCurrentDir()}
 
 @app.post("/upload-file/")
@@ -59,5 +62,7 @@ async def download_file(rel_path: str):
     if not os.path.exists(full_path) or not os.path.isfile(full_path):
         raise HTTPException(status_code=404, detail="File not found")
     # Stream the file as an attachment
-    return FileResponse(full_path, filename=os.path.basename(full_path), media_type="application/octet-stream")
+    filename = os.path.basename(full_path)
+    print(filename)
+    return FileResponse(full_path, filename=filename, media_type="application/octet-stream")
 

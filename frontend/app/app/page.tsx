@@ -21,6 +21,16 @@ export default function Root() {
       console.error("Error fetching path:", error)
     }
   }
+  // handler to update path and reload files from Header
+  const handleSetPath = async (newPath: string) => {
+    try {
+      setPathAtual(newPath);
+      await setDirectory(newPath);
+      await getFilesFromAPI();
+    } catch (error) {
+      console.error("Error setting path:", error);
+    }
+  }
 
   const getFilesFromAPI = async () => {
     try {
@@ -34,6 +44,8 @@ export default function Root() {
   const downloadFile = async (filePath: string) => {
     try {
       const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
+      const contentDisposition = response.headers.get("content-disposition");
+      const filename = contentDisposition?.match(/filename="?([^"]+)"?/)?.[1];
       if (!response.ok) {
         throw new Error("Failed to download file");
       }
@@ -41,7 +53,7 @@ export default function Root() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filePath.split("/").pop() || "download";
+      a.download = filename || "download";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -55,7 +67,6 @@ export default function Root() {
   }, []);
 
   useEffect(() => {
-    console.log(pathAtual)
     getFilesFromAPI()
     setCriandoDiretorio(false);
   }, [pathAtual])
@@ -150,6 +161,7 @@ export default function Root() {
             handleGoBack={handleGoBack}
             handleUpload={handleUpload}
             handleCreateDirectory={handleCreateDirectory}
+            handleSetPath={handleSetPath}
           />
           <div className="flex gap-2 flex-wrap p-4 p-4">
             <div className="flex flex-wrap gap-2">
