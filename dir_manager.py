@@ -1,5 +1,6 @@
 import os
 import shutil
+from io import BytesIO
 
 class DirManager:
     def __init__(self, base_dir):
@@ -43,9 +44,9 @@ class DirManager:
             # path relativo à base_dir, para não expor caminhos absolutos
             rel_path = os.path.relpath(full_path, self.base_dir)
             if os.path.isdir(full_path):
-                formated_contents.insert(0, {'label': f'[DIR] {item}', 'path': rel_path})
+                formated_contents.insert(0, {'label': f'[DIR] {item}', 'path': rel_path,'type': 'directory'})
             else:
-                formated_contents.append({'label': item, 'path': rel_path})
+                formated_contents.append({'label': item, 'path': rel_path,'type': 'file'})
 
         return formated_contents
     
@@ -56,12 +57,10 @@ class DirManager:
             f.write(content)
         return 'File created successfully'
 
-    def uploadFile(self, file_path):
-        with open(file_path,'r') as file:
-            content = file.read()
-            filename = file.name.split('/')[-1]
-        with open(os.path.join(self.current_dir, filename), 'w') as f:
-            f.write(content)
+    def uploadFile(self,filename, file_bytes):
+        file = BytesIO(file_bytes)
+        with open(os.path.join(self.current_dir, filename), 'wb') as f:
+            f.write(file.getvalue())
         return 'File uploaded successfully'
 
     def deleteDirectory(self, dir_name):

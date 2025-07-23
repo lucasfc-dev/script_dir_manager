@@ -29,3 +29,9 @@ async def set_directory(request: Request):
     path = data['path']
     dir_manager.setCurrentDir(dir_manager.join_full_path(path))
     return {"path": dir_manager.getCurrentDir()}
+
+@app.post("/upload-file/")
+async def upload_file(request: Request, file: UploadFile = File(...)):
+    file_content = await file.read()
+    dir_manager.uploadFile(file.filename, file_content)
+    return {"message": "File uploaded successfully"}
