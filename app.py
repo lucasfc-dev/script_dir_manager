@@ -24,9 +24,7 @@ def get_current_directory():
     return {"path": current_dir}
 
 @app.get('/set-directory/')
-async def set_directory(request: Request):
-    data = await request.json()
-    path = data['path']
+async def set_directory(path: str):
     dir_manager.setCurrentDir(dir_manager.join_full_path(path))
     return {"path": dir_manager.getCurrentDir()}
 
