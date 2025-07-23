@@ -23,6 +23,11 @@ def get_current_directory():
     current_dir = dir_manager.getCurrentDir()
     return {"path": current_dir}
 
+@app.get("/previous-directory")
+def get_previous_directory():  
+    previous_dir = dir_manager.getPreviousDir()
+    return {"path": previous_dir}
+
 @app.get('/set-directory/')
 async def set_directory(path: str):
     dir_manager.setCurrentDir(dir_manager.join_full_path(path))

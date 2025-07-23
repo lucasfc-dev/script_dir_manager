@@ -27,7 +27,9 @@ class DirManager:
         return rel_path
 
     def getPreviousDir(self):
-        return os.path.dirname(self.current_dir)
+        previous_dir = os.path.dirname(self.current_dir)
+        self.setCurrentDir(previous_dir)
+        return previous_dir
 
     def createDirectory(self, dir_name):
         path_dir = os.path.join(self.current_dir, dir_name)
