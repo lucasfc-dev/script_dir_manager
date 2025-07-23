@@ -11,7 +11,7 @@ class DirManager:
         abs_path_dir = os.path.join(self.base_dir, rel_path_dir)
         if not os.path.exists(abs_path_dir):
             return 'Directory does not exist'
-        if not abs_path_dir.startswith(self.base_dir):
+        if not abs_path_dir.startswith(self.base_dir) or (rel_path_dir == '../' and self.current_dir == self.base_dir):
             return 'Cannot navigate outside the base directory'
         os.chdir(abs_path_dir)
         self.current_dir = os.getcwd()
