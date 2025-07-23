@@ -17,10 +17,11 @@ class DirManager:
         self.current_dir = os.getcwd()
 
     def goToPreviousDir(self):
-        previous_dir = self.getPreviousDir()
         if self.current_dir == self.base_dir:
             return 'Already in the base directory'
+        previous_dir = self.getPreviousDir()
         self.setCurrentDir(previous_dir)
+        return previous_dir
 
     def getCurrentDir(self):
         full_path = os.path.abspath(self.current_dir)
@@ -29,8 +30,9 @@ class DirManager:
 
     def getPreviousDir(self):
         previous_dir = os.path.dirname(self.current_dir)
+        rel_path = os.path.relpath(previous_dir, self.base_dir)
         self.setCurrentDir(previous_dir)
-        return previous_dir
+        return rel_path
 
     def createDirectory(self, dir_name):
         path_dir = os.path.join(self.current_dir, dir_name)

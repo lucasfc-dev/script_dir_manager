@@ -25,7 +25,7 @@ def get_current_directory():
 
 @app.get("/previous-directory")
 def get_previous_directory():  
-    previous_dir = dir_manager.getPreviousDir()
+    previous_dir = dir_manager.goToPreviousDir()
     return {"path": previous_dir}
 
 @app.get('/set-directory/')
