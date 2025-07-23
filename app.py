@@ -54,7 +54,7 @@ async def delete_directory(request: Request, rel_path: str):
 @app.get("/download-file/")
 async def download_file(rel_path: str):
     # Resolve the absolute path
-    full_path = dir_manager.join_full_path(rel_path)
+    full_path = os.path.join(dir_manager.base_dir, rel_path)
     # Verify the file exists and is not a directory
     if not os.path.exists(full_path) or not os.path.isfile(full_path):
         raise HTTPException(status_code=404, detail="File not found")
