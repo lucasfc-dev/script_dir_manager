@@ -36,5 +36,5 @@ async def set_directory(path: str):
 @app.post("/upload-file/")
 async def upload_file(request: Request, file: UploadFile = File(...)):
     file_content = await file.read()
-    dir_manager.uploadFile(file.filename, file_content)
-    return {"message": "File uploaded successfully"}
+    msg = dir_manager.uploadFile(file.filename, file_content)
+    return {"message": msg}

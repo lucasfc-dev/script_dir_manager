@@ -61,12 +61,17 @@ class DirManager:
 
     def uploadFile(self,filename, file_bytes):
         file = BytesIO(file_bytes)
-        with open(os.path.join(self.current_dir, filename), 'wb') as f:
-            f.write(file.getvalue())
-        return 'File uploaded successfully'
+        print(self.join_full_path(filename))
+        print(os.path.exists(self.join_full_path(filename)))
+        if os.path.exists(self.join_full_path(filename)):
+            return 'File already exists'
+        else:
+            with open(self.join_full_path(filename), 'wb') as f:
+                f.write(file.getvalue())
+                return 'File uploaded successfully'
 
     def deleteDirectory(self, dir_name):
-        path_dir = os.path.join(self.current_dir, dir_name)
+        path_dir = self.join_full_path(dir_name)
         if os.path.exists(path_dir):
             if os.path.isdir(path_dir):
                 shutil.rmtree(path_dir)

@@ -11,12 +11,11 @@ export const getPath = async () => {
 
 
 export const setDirectory = async (path: string) => {
-    const response = await fetch(`http://localhost:8000/set-directory`, {
+    const response = await fetch(`http://localhost:8000/set-directory/?path=${encodeURIComponent(path)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path }),
+        }
     });
     if (!response.ok) {
         throw new Error("Failed to set directory");
@@ -24,6 +23,13 @@ export const setDirectory = async (path: string) => {
     return await response.json();
 }
 
+export const prevDirectory = async () => {
+    const response = await fetch(`http://localhost:8000/previous-directory`);
+    if (!response.ok) {
+        throw new Error("Failed to fetch previous directory");
+    }
+    return await response.json()
+}
 
 export const getFiles = async () : Promise<IItemPasta[]> => {
     const response = await fetch(`http://localhost:8000/directory-contents`);
