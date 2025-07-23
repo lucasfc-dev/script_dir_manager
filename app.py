@@ -1,5 +1,7 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI,Request, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException
+import os
+from fastapi.responses import FileResponse
 from dir_manager import DirManager
 
 app = FastAPI()
@@ -48,3 +50,14 @@ async def create_directory(request: Request, dir_name: str):
 async def delete_directory(request: Request, rel_path: str):
     response = dir_manager.deleteDirectory(rel_path)
     return {"message": response}
+ 
+@app.get("/download-file/")
+async def download_file(rel_path: str):
+    # Resolve the absolute path
+    full_path = dir_manager.join_full_path(rel_path)
+    # Verify the file exists and is not a directory
+    if not os.path.exists(full_path) or not os.path.isfile(full_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    # Stream the file as an attachment
+    return FileResponse(full_path, filename=os.path.basename(full_path), media_type="application/octet-stream")
+

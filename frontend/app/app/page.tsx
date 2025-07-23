@@ -31,6 +31,25 @@ export default function Root() {
     }
   }
 
+  const downloadFile = async (filePath: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filePath.split("/").pop() || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  }
+
   useEffect(() => {
     fetchPathFromAPI();
   }, []);
@@ -47,6 +66,10 @@ export default function Root() {
 
   const handleDoubleClick = async (path: string) => {
     try {
+      if (itemSelecionado?.type === 'file') {
+        await downloadFile(path);
+        return;
+      }
       setPathAtual(path);
       setDirectory(path)
       await getFilesFromAPI();
