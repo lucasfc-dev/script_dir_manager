@@ -45,7 +45,18 @@ export default function Root() {
     try {
       const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
       const contentDisposition = response.headers.get("content-disposition");
-      const filename = contentDisposition?.match(/filename="?([^"]+)"?/)?.[1];
+      let filename = "download";
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename\*=utf-8''([^;\n]*)/i);
+        if (match && match[1]) {
+          filename = decodeURIComponent(match[1]);
+        } else {
+          const fallback = contentDisposition.match(/filename="?([^";\n]*)"?/i);
+          if (fallback && fallback[1]) {
+            filename = fallback[1];
+          }
+        }
+      }
       if (!response.ok) {
         throw new Error("Failed to download file");
       }
@@ -53,7 +64,7 @@ export default function Root() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename || "download";
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
