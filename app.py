@@ -30,7 +30,7 @@ def get_previous_directory():
 
 @app.get('/set-directory/')
 async def set_directory(path: str):
-    dir_manager.setCurrentDir(dir_manager.join_full_path(path))
+    dir_manager.setCurrentDir(path)
     return {"path": dir_manager.getCurrentDir()}
 
 @app.post("/upload-file/")
