@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEGOLAS SYSTEM HAHA",
+  title: "Gerenciador de Arquivos",
   description: "BY LEVI, PIRANHA",
 };
 
