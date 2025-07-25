@@ -2,9 +2,11 @@
 
 🚀 **Gerenciador de Arquivos Web com Backend Python + Frontend Next.js**
 
->
 > ---
->> Por [@levzxn](https://github.com/levzxn) e [@lucas-fcdev](https://github.com/lucas-fcdev)
+>
+>> Por [@levzxn](https://github.com/levzxn) e [@lucasfc-dev](https://github.com/lucasfc-dev)
+>>
+>
 > ---
 
 ---
