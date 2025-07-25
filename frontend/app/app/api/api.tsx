@@ -84,6 +84,7 @@ export const downloadFileFromAPI = async (filePath: string) => {
     try {
         const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
         const contentDisposition = response.headers.get("content-disposition");
+        console.log("Content-Disposition:", contentDisposition);
         let filename = "download";
         if (contentDisposition) {
             const match = contentDisposition.match(/filename\*=utf-8''([^;\n]*)/i);
