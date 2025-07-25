@@ -4,23 +4,18 @@
 
 ---
 
-## ✨ O que é?
+## ✨ Descrição
 Um sistema web inspirado no Windows Explorer para gerenciar arquivos e diretórios, com upload, download, criação e deleção de pastas/arquivos, tudo via interface moderna e responsiva.
 
 - **Frontend:** Next.js (React + TailwindCSS)
 - **Backend:** FastAPI (Python)
 - **Gerenciamento real de arquivos no servidor**
-
 ---
 
 ## 🖥️ Funcionalidades
 - Visualização de arquivos e pastas em árvore
 - Upload e download de arquivos
 - Criação e deleção de diretórios
-- Breadcrumb (caminho) igual ao Windows
-- Input focado automaticamente para novo diretório
-- Interface responsiva e estilosa
-
 ---
 
 ## 🚦 Como rodar localmente
@@ -57,12 +52,6 @@ Acesse: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🌍 Deploy
-- **Frontend:** Pode ser deployado na Vercel (apenas interface)
-- **Backend:** Use Railway, Render, Fly.io, VPS, etc. (Vercel não suporta FastAPI com acesso a disco persistente)
-
----
-
 ## 🛠️ Estrutura do Projeto
 ```
 script_versionamento/
@@ -76,14 +65,10 @@ script_versionamento/
 
 ---
 
-## 🤝 Contribua
-Pull requests são bem-vindos! Abra uma issue para discutir melhorias ou bugs.
-
----
 
 ## 📄 Licença
 MIT
 
 ---
 
-> Feito com 💻 e café por Levi e colaboradores.
+> Por @levzxn e @lucas-fcdev
