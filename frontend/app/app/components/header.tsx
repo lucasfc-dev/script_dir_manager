@@ -1,10 +1,8 @@
 import { CiCirclePlus } from "react-icons/ci";
 import { FaTrash } from "react-icons/fa";
 import { IoIosArrowBack } from "react-icons/io";
-import React, { use, useEffect, useState } from "react";
-import { IItemPasta } from "./itemPasta";
-import path from "path";
-import { setDirectory,getFiles } from "../api/api";
+import React, { useState } from "react";
+
 
 interface IHeaderProps {
     pathAtual: string;
@@ -31,12 +29,20 @@ export default function Header({ pathAtual, handleGoBack, handleUpload, handleCr
 
     async function handleSaveEdit() {
         setIsEditing(false);
+        if (editingPath === pathAtual) return
         handleSetPath(editingPath);
     }
 
-    const segments = pathAtual === '.'
-        ? ['.']
-        : ['.'].concat(pathAtual.split(/\\|\//).filter(Boolean));
+    let segments: string[];
+    if (pathAtual === '.' || pathAtual === './') {
+        segments = ['.'];
+    } else if (pathAtual.startsWith('./')) {
+        segments = ['.'].concat(pathAtual.slice(2).split(/\\|\//).filter(Boolean));
+    }
+    else {
+        segments = ['.'].concat(pathAtual.split(/\\|\//).filter(Boolean));
+    }
+
     return (
         <header className="flex w-full bg-white text-black h-16 items-center px-4 shadow-md">
             <nav className="flex items-center w-full gap-4">

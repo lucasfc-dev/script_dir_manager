@@ -1,14 +1,13 @@
 'use client';
-import ItemPasta, { IItemPasta } from "./components/itemPasta";
+import { IItemPasta } from "./components/itemPasta";
 import { useEffect, useState } from "react";
-import { createDirectory, deleteItem, getFiles, getPath, prevDirectory, setDirectory } from "./api/api";
-import ItemNovoDir from "./components/itemNovoDir";
+import { deleteItem, getFiles, getPath, prevDirectory, setDirectory, uploadFile } from "./api/api";
 import Header from "./components/header";
+import ListaItens from "./components/listaItens";
 
 export default function Root() {
   const [pathAtual, setPathAtual] = useState<string>("");
   const [criandoDiretorio, setCriandoDiretorio] = useState<boolean>(false);
-  const [nomeDiretorio, setNomeDiretorio] = useState<string>("");
   const [files, setFiles] = useState<IItemPasta[]>([]);
   const [itemSelecionado, setItemSelecionado] = useState<IItemPasta | null>(null);
 
@@ -21,55 +20,17 @@ export default function Root() {
       console.error("Error fetching path:", error)
     }
   }
-  // handler to update path and reload files from Header
+
   const handleSetPath = async (newPath: string) => {
     try {
+      if (!newPath.includes('.')) {
+        newPath = '.' + newPath;
+      }
       setPathAtual(newPath);
-      await setDirectory(newPath);
-      await getFilesFromAPI();
+      await setDirectory(newPath) 
+      setFiles(await getFiles());
     } catch (error) {
       console.error("Error setting path:", error);
-    }
-  }
-
-  const getFilesFromAPI = async () => {
-    try {
-      const response = await getFiles()
-      setFiles(response);
-    } catch (error) {
-      console.error("Error fetching files:", error)
-    }
-  }
-
-  const downloadFile = async (filePath: string) => {
-    try {
-      const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
-      const contentDisposition = response.headers.get("content-disposition");
-      let filename = "download";
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename\*=utf-8''([^;\n]*)/i);
-        if (match && match[1]) {
-          filename = decodeURIComponent(match[1]);
-        } else {
-          const fallback = contentDisposition.match(/filename="?([^";\n]*)"?/i);
-          if (fallback && fallback[1]) {
-            filename = fallback[1];
-          }
-        }
-      }
-      if (!response.ok) {
-        throw new Error("Failed to download file");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (error) {
-      console.error("Error downloading file:", error);
     }
   }
 
@@ -78,34 +39,18 @@ export default function Root() {
   }, []);
 
   useEffect(() => {
-    getFilesFromAPI()
-    setCriandoDiretorio(false);
-  }, [pathAtual])
+    (async () => {
+      setFiles(await getFiles());
+      setCriandoDiretorio(false);
+    })();
+  }, [pathAtual]);
 
-  const handleClick = (file: IItemPasta) => {
-    setItemSelecionado(file);
-  }
-
-  const handleDoubleClick = async (path: string) => {
-    try {
-      if (itemSelecionado?.type === 'file') {
-        await downloadFile(path);
-        return;
-      }
-      setPathAtual(path);
-      setDirectory(path)
-      await getFilesFromAPI();
-    }
-    catch (error) {
-      console.error("Error setting directory:", error);
-    }
-  }
 
   const handleGoBack = async () => {
     try {
       const response = await prevDirectory();
       setPathAtual(response.path);
-      await getFilesFromAPI();
+      setFiles(await getFiles());
     } catch (error) {
       console.error("Error going back to previous directory:", error);
     }
@@ -115,25 +60,9 @@ export default function Root() {
     const file = event.target.files?.[0];
     console.log(file)
     if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
-    try {
-      const response = await fetch(`http://localhost:8000/upload-file`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to upload file");
-      }
-      await getFilesFromAPI();
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  }
-
-  const handleCreateDirectory = async () => {
-    setCriandoDiretorio(true)
-    setNomeDiretorio("")
+    await uploadFile(file)
+    setFiles(await getFiles());
+    event.target.value = "";
   }
 
   const handleDelete = async (item: IItemPasta | null) => {
@@ -141,26 +70,13 @@ export default function Root() {
     try {
       await deleteItem(item.path);
       setItemSelecionado(null);
-      await getFilesFromAPI();
+      setFiles(await getFiles());
     } catch (error) {
       console.error("Error deleting file:", error);
     }
   }
 
-  const uploadNewDirectory = async (name: string) => {
-    if (!name.trim()) {
-      console.error("Directory name cannot be empty");
-      return;
-    }
-    try {
-      await createDirectory(name);
-      setCriandoDiretorio(false);
-      setNomeDiretorio("");
-      await getFilesFromAPI();
-    } catch (error) {
-      console.error("Error creating directory:", error);
-    }
-  }
+
 
   return (
     <main className="flex h-screen w-screen flex-col">
@@ -171,40 +87,20 @@ export default function Root() {
             handleDelete={() => handleDelete(itemSelecionado)}
             handleGoBack={handleGoBack}
             handleUpload={handleUpload}
-            handleCreateDirectory={handleCreateDirectory}
+            handleCreateDirectory={() => setCriandoDiretorio(true)}
             handleSetPath={handleSetPath}
           />
-          <div className="flex gap-2 flex-wrap p-4 p-4">
-            <div className="flex flex-wrap gap-2">
-              {files.length === 0 ? (
-                <div className="text-gray-500">
-                  <span>Nenhum arquivo ou diretório encontrado.</span>
-                </div>
-              ) : null}
-              {files.map((file: IItemPasta, index) => (
-                <ItemPasta
-                  selecionado={itemSelecionado === file}
-                  type={file.type}
-                  key={index}
-                  label={file.label}
-                  path={file.path}
-                  onClick={() => handleClick(file)}
-                  onDoubleClick={() => handleDoubleClick(file.path)}
-                />
-              ))}
-              {criandoDiretorio && (
-                <ItemNovoDir
-                  onCreate={uploadNewDirectory}
-                  onChange={setNomeDiretorio}
-                  onCancel={() => setCriandoDiretorio(false)}
-                  nomeDiretorio={nomeDiretorio}
-                />
-              )}
-            </div>
-          </div>
+          <ListaItens
+            files={files}
+            itemSelecionado={itemSelecionado}
+            setItemSelecionado={setItemSelecionado}
+            criandoDiretorio={criandoDiretorio}
+            setPathAtual={setPathAtual}
+            pathAtual={pathAtual}
+            setFiles={setFiles}
+            setCriandoDiretorio={setCriandoDiretorio}
+          />
         </div>
-
-
       </section>
     </main>
   )

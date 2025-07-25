@@ -63,3 +63,51 @@ export const deleteItem = async (path: string) => {
         throw new Error("Failed to delete item");
     }
 }
+
+export const uploadFile = async (file: File) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await fetch(`http://localhost:8000/upload-file`, {
+            method: 'POST',
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error("Failed to upload file");
+        }
+    } catch (error) {
+        throw new Error("Error uploading file: " + error);
+    }
+}
+
+export const downloadFileFromAPI = async (filePath: string) => {
+    try {
+        const response = await fetch(`http://localhost:8000/download-file?rel_path=${encodeURIComponent(filePath)}`);
+        const contentDisposition = response.headers.get("content-disposition");
+        let filename = "download";
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename\*=utf-8''([^;\n]*)/i);
+            if (match && match[1]) {
+                filename = decodeURIComponent(match[1]);
+            } else {
+                const fallback = contentDisposition.match(/filename="?([^";\n]*)"?/i);
+                if (fallback && fallback[1]) {
+                    filename = fallback[1];
+                }
+            }
+        }
+        if (!response.ok) {
+            throw new Error("Failed to download file");
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    } catch (error) {
+        console.error("Error downloading file:", error);
+    }
+}
